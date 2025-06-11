@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import '../services/api_service.dart';
+import 'package:salary_app/screens/pdf_view_screen.dart'; // путь зависит от структуры
 
 /// Виджет экрана списка зарплат (для обычных пользователей).
 class SalaryList extends StatelessWidget {
@@ -48,19 +49,26 @@ class SalaryList extends StatelessWidget {
             const SizedBox(height: 8),
             ElevatedButton(
               onPressed: () async {
-                final messenger = ScaffoldMessenger.of(context);
                 try {
-                  await ApiService().downloadFile('/salaries/export/excel', 'salaries.xlsx');
-                  messenger.showSnackBar(
-                    const SnackBar(content: Text('Excel успешно загружен')),
-                  );
+                  final filePath = await ApiService().downloadFile('/salaries/export/pdf', 'salaries.pdf');
+
+                  if (context.mounted) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => PdfViewScreen(filePath: filePath),
+                      ),
+                    );
+                  }
                 } catch (e) {
-                  messenger.showSnackBar(
-                    SnackBar(content: Text('Ошибка при загрузке Excel: $e')),
-                  );
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Ошибка при загрузке PDF: $e')),
+                    );
+                  }
                 }
               },
-              child: const Text('Скачать Excel'),
+              child: const Text('Скачать и просмотреть PDF'),
             ),
           ],
         ),

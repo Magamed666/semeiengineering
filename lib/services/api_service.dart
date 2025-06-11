@@ -56,8 +56,8 @@ class ApiService {
   }
 
   // Метод для загрузки файлов
-  Future<void> downloadFile(String endpoint, String filename) async {
-    final token = await storage.read(key: 'token'); // Используем secure_storage для токена
+  Future<String> downloadFile(String endpoint, String filename) async {
+    final token = await storage.read(key: 'token');
 
     if (token == null) {
       throw Exception('Токен авторизации не найден.');
@@ -73,13 +73,12 @@ class ApiService {
       final dir = await getTemporaryDirectory();
       final file = File('${dir.path}/$filename');
       await file.writeAsBytes(bytes);
-
-      await OpenFilex.open(file.path);
+      return file.path; // возвращаем путь
     } else {
       throw Exception('Ошибка загрузки файла: ${response.statusCode}');
     }
   }
+}
 
 // Здесь вы можете добавить другие методы, например, для админки
 // static Future<Map<String, dynamic>> adminAction(...) { ... }
-}
